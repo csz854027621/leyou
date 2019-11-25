@@ -21,4 +21,24 @@ public class CategoryServiceImpl implements CategoryService {
         category.setParentId(pid);
         return cm.select(category);
     }
+
+    @Override
+    public List<Category> findAllByBid(Long bid) {
+        return  cm.findAllByBid(bid);
+    }
+
+    @Override
+    public void add(Category category) {
+        cm.insert(category);
+    }
+
+    @Override
+    public void update(Category category) {
+        cm.updateByPrimaryKeySelective(category);
+    }
+
+    @Override
+    public void delete(Long id) {
+        cm.deleteByPrimaryKey(id);
+    }
 }

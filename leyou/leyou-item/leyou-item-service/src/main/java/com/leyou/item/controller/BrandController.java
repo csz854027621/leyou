@@ -3,12 +3,15 @@ package com.leyou.item.controller;
 import com.leyou.common.pojo.PageResult;
 import com.leyou.item.pojo.Brand;
 import com.leyou.item.service.BrandService;
+import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("brand")
@@ -32,6 +35,28 @@ public class BrandController {
         }
         return  ResponseEntity.ok(result);
     }
+
+
+    @PostMapping
+    public ResponseEntity<Void> save(Brand brand,@RequestParam(name="cids",required = true) List<Long> cids){
+
+        bs.save(brand,cids);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+
+    @PutMapping
+    public ResponseEntity<Void> update(Brand brand,@RequestParam(name="cids",required = true) List<Long> cids){
+        bs.update(brand,cids);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @DeleteMapping("{bid}")
+    public ResponseEntity<Void> delete(@PathVariable("bid") Long bid){
+        bs.delete(bid);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
 
 
 }

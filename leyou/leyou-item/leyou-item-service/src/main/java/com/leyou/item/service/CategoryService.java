@@ -13,4 +13,12 @@ public interface CategoryService {
      * @return
      */
     public List<Category> findAllByPid(Long pid);
+
+    List<Category> findAllByBid(Long bid);
+
+    void add(Category category);
+
+    void update(Category category);
+
+    void delete(Long id);
 }

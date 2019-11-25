@@ -72,7 +72,7 @@
           this.$http({
             method: this.isEdit ? 'put' : 'post',
             url: '/item/brand',
-            data: params
+            data: this.$qs.stringify(params)  //params的json数据 转换成 ？name=a&age=11
           }).then(() => {
             // 关闭窗口
             this.$emit("close");

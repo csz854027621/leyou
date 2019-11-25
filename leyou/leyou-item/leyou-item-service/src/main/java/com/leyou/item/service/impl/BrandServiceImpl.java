@@ -9,6 +9,7 @@ import com.leyou.item.service.BrandService;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
@@ -36,5 +37,33 @@ public class BrandServiceImpl implements BrandService {
         result.setItems(pageInfo.getList());
         result.setTotal(pageInfo.getTotal());
         return result;
+    }
+
+    @Transactional
+    @Override
+    public void save(Brand brand, List<Long> cids) {
+
+        bm.insertSelective(brand);
+        cids.forEach(cid->bm.saveBrandAndCategory(brand.getId(),cid));
+
+    }
+
+    @Override
+    public Brand findOneByBid(Long bid) {
+        return bm.selectByPrimaryKey(bid);
+    }
+
+    @Transactional
+    @Override
+    public void update(Brand brand, List<Long> cids) {
+        bm.updateByPrimaryKeySelective(brand);
+        bm.deleteBrandAndCategoryByBid(brand.getId());
+        cids.forEach(cid->bm.saveBrandAndCategory(brand.getId(),cid));
+    }
+
+
+    @Override
+    public void delete(Long bid) {
+        bm.deleteByPrimaryKey(bid);
     }
 }

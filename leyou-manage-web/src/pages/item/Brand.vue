@@ -123,6 +123,13 @@
         // 把oldBrand变为null
         this.oldBrand = null;
       },
+      deleteBrand(oldBrand){
+        // 根据品牌id删除品牌
+        this.$http.delete("/item/brand/" + oldBrand.id)
+          .then(({data}) => {
+            this.getDataFromServer();
+          })
+      },
       editBrand(oldBrand){
         // 根据品牌信息查询商品分类
         this.$http.get("/item/category/bid/" + oldBrand.id)
