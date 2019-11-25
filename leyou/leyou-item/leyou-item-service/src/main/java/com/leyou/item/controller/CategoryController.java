@@ -4,7 +4,7 @@ import com.leyou.item.pojo.Brand;
 import com.leyou.item.pojo.Category;
 import com.leyou.item.service.BrandService;
 import com.leyou.item.service.CategoryService;
-import com.sun.org.apache.regexp.internal.RE;
+
 import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

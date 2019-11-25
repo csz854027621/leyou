@@ -16,9 +16,12 @@ public interface CategoryService {
 
     List<Category> findAllByBid(Long bid);
 
+    List<String> findNameByCids(List<Long> cids);
+
     void add(Category category);
 
     void update(Category category);
 
     void delete(Long id);
+
 }

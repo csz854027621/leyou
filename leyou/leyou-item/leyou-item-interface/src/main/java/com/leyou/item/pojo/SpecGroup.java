@@ -9,9 +9,7 @@ public class SpecGroup {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private Long cid;
-
     private String name;
 
     @Transient

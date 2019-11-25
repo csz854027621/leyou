@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class CategoryServiceImpl implements CategoryService {
@@ -25,6 +27,13 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public List<Category> findAllByBid(Long bid) {
         return  cm.findAllByBid(bid);
+    }
+
+    @Override
+    public List<String> findNameByCids(List<Long> cids) {
+        List<Category> categories = cm.selectByIdList(cids);
+        Stream<String> stringStream = categories.stream().map(category -> category.getName());
+        return  stringStream.collect(Collectors.toList());
     }
 
     @Override
