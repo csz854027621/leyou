@@ -25,7 +25,7 @@ public class GoodsServiceImpl implements GoodsService {
 
 
     @Autowired
-    private  SpecGroupMapper specGroupMapper;
+    private SpecGroupMapper specGroupMapper;
 
     @Autowired
     private SpecParamMapper sp;
@@ -49,7 +49,7 @@ public class GoodsServiceImpl implements GoodsService {
 
     @Override
     public List<SpecGroup> findAllSpecGroupByCondition(Long cid) {
-        SpecGroup specGroup=new SpecGroup();
+        SpecGroup specGroup = new SpecGroup();
         specGroup.setCid(cid);
         return specGroupMapper.select(specGroup);
     }
@@ -59,24 +59,24 @@ public class GoodsServiceImpl implements GoodsService {
     public PageResult<SpuBo> findAllSpuBoByCondition(String key, Boolean saleable, Integer page, Integer rows) {
 
         //1.添加条件查询；
-        Example example=new Example(Spu.class);
+        Example example = new Example(Spu.class);
         Example.Criteria criteria = example.createCriteria();
 
-        if (StringUtils.isNotBlank(key)){
-            criteria.andLike("title","%"+key+"%");
+        if (StringUtils.isNotBlank(key)) {
+            criteria.andLike("title", "%" + key + "%");
         }
-        if (saleable!=null){
-            criteria.andEqualTo("saleable",saleable);
+        if (saleable != null) {
+            criteria.andEqualTo("saleable", saleable);
         }
         //2.分页；
-        PageHelper.startPage(page,rows);
+        PageHelper.startPage(page, rows);
         List<Spu> spus = sm.selectByExample(example);
-        PageInfo<Spu> pageInfo=new PageInfo<>(spus);
+        PageInfo<Spu> pageInfo = new PageInfo<>(spus);
 
         //3.根据条件再查询，并信息封装；
-        List<SpuBo> spuBos= spus.stream().map(spu -> {
+        List<SpuBo> spuBos = spus.stream().map(spu -> {
             SpuBo spuBo = new SpuBo();
-            BeanUtils.copyProperties(spu,spuBo);
+            BeanUtils.copyProperties(spu, spuBo);
             Brand brand = bm.selectByPrimaryKey(spu.getBrandId());
             spuBo.setBname(brand.getName());
             List<String> nameByCids = cs.findNameByCids(Arrays.asList(spuBo.getCid1(),
@@ -109,7 +109,7 @@ public class GoodsServiceImpl implements GoodsService {
         });
         */
 
-        PageResult<SpuBo> result=new PageResult<>();
+        PageResult<SpuBo> result = new PageResult<>();
         result.setItems(spuBos);
         result.setTotal(pageInfo.getTotal());
 
@@ -119,10 +119,28 @@ public class GoodsServiceImpl implements GoodsService {
 
     @Override
     public List<SpecParam> findAllSpecParamByCondition(Long cid) {
-        SpecParam spb=new SpecParam();
+        SpecParam spb = new SpecParam();
         spb.setCid(cid);
         List<SpecParam> select = sp.select(spb);
         return select;
+    }
+
+    @Override
+    public SpuDetail findAllSpuDetailByCondition(Long spuId) {
+        SpuDetail spuDetail = sd.selectByPrimaryKey(spuId);
+        return spuDetail;
+    }
+
+    @Override
+    public List<Sku> findAllSkusByCondition(Long spuId) {
+        Sku sku=new Sku();
+        sku.setSpu_id(spuId);
+        List<Sku> skus = sk.select(sku);
+        skus.forEach(su->{
+            Stock stock = stockMapper.selectByPrimaryKey(su.getId());
+            su.setStock(stock.getStock());
+        });
+        return skus;
     }
 
     @Transactional
@@ -146,12 +164,44 @@ public class GoodsServiceImpl implements GoodsService {
             sku.setEnable(true);
             sk.insertSelective(sku);
             //保存库存
-            Stock stock=new Stock();
+            Stock stock = new Stock();
             stock.setSkuId(sku.getId());
             stock.setStock(sku.getStock());
             stockMapper.insertSelective(stock);
         });
-        System.out.println("dd");
+    }
+
+
+    @Transactional
+    @Override
+    public void update(SpuBo sb) {
+        //更新spu、detail
+        sb.setLastUpdateTime(new Date());
+        sm.updateByPrimaryKeySelective(sb);
+        sd.updateByPrimaryKeySelective(sb.getSpuDetail());
+
+        //更新sku/stock
+        //1.删除
+        Sku sku=new Sku();
+        sku.setSpu_id(sb.getId());
+        List<Sku> skuList = sk.select(sku);
+        skuList.forEach(su->{
+            stockMapper.deleteByPrimaryKey(su.getStock());
+            sk.deleteByPrimaryKey(su.getId());
+        });
+        //2.添加
+        sb.getSkus().forEach(one->{
+            one.setCreateTime(new Date());
+            one.setLastUpdateTime(one.getCreateTime());
+            one.setSpu_id(sb.getId());
+            one.setEnable(true);
+            sk.insertSelective(one);
+            Stock stock=new Stock();
+            stock.setSkuId(one.getId());
+            stock.setStock(one.getStock());
+            stockMapper.insertSelective(stock);
+        });
+
     }
 
 

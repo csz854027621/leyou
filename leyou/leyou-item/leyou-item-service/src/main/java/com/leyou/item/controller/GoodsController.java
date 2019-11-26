@@ -2,8 +2,10 @@ package com.leyou.item.controller;
 
 import com.leyou.common.pojo.PageResult;
 import com.leyou.item.bo.SpuBo;
+import com.leyou.item.pojo.Sku;
 import com.leyou.item.pojo.SpecGroup;
 import com.leyou.item.pojo.SpecParam;
+import com.leyou.item.pojo.SpuDetail;
 import com.leyou.item.service.GoodsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 
 @Controller
@@ -71,10 +74,39 @@ public class GoodsController {
         return ResponseEntity.ok(params);
     }
 
-        @PostMapping("goods")
+    @GetMapping("spu/detail/{spuId}")
+    public ResponseEntity<SpuDetail> findAllSpuDetailByCondition(@PathVariable("spuId") Long spuId){
+        SpuDetail spuDetails=gs.findAllSpuDetailByCondition(spuId);
+        if (spuDetails==null){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(spuDetails);
+    }
+
+    @GetMapping("sku/list")
+    public ResponseEntity< List<Sku>> findAllSkusByCondition(@RequestParam(name="id") Long id){
+        List<Sku> skus=gs.findAllSkusByCondition(id);
+        if (CollectionUtils.isEmpty(skus)){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(skus);
+    }
+
+    @PostMapping("goods")
     public ResponseEntity<Void> save(@RequestBody SpuBo sb){
         gs.save(sb);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
+    @PutMapping("goods")
+    public ResponseEntity<Void> update(@RequestBody SpuBo sb){
+        gs.update(sb);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+
+
+
+
 
 }
