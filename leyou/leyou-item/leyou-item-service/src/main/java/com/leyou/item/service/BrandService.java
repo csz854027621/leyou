@@ -12,4 +12,6 @@ public interface BrandService {
 
     void update(Brand brand, List<Long> cids);
     public void delete(Long bid);
+
+    List<Brand> findAllByCid(Long cid);
 }

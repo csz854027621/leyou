@@ -4,37 +4,43 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.leyou.common.pojo.PageResult;
 import com.leyou.item.bo.SpuBo;
-import com.leyou.item.mapper.BrandMapper;
-import com.leyou.item.mapper.CategoryMapper;
-import com.leyou.item.mapper.SpuMapper;
-import com.leyou.item.pojo.Brand;
-import com.leyou.item.pojo.Category;
-import com.leyou.item.pojo.Spu;
-import com.leyou.item.service.BrandService;
+import com.leyou.item.mapper.*;
+import com.leyou.item.pojo.*;
 import com.leyou.item.service.CategoryService;
-import com.leyou.item.service.SpuService;
+import com.leyou.item.service.GoodsService;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
-public class SpuServiceImpl implements SpuService {
+public class GoodsServiceImpl implements GoodsService {
+
+
+    @Autowired
+    private  SpecGroupMapper specGroupMapper;
+
+    @Autowired
+    private SpecParamMapper sp;
+    @Autowired
+    private SpuDetailMapper sd;
+    @Autowired
+    private SkuMapper sk;
 
     @Autowired
     private SpuMapper sm;
 
     @Autowired
     private BrandMapper bm;
-
+    @Autowired
+    private StockMapper stockMapper;
     @Autowired
     private CategoryMapper cm;
 
@@ -42,10 +48,18 @@ public class SpuServiceImpl implements SpuService {
     private CategoryService cs;
 
     @Override
-    public PageResult<SpuBo> findAllByCondition(String key, Boolean saleable, Integer page, Integer rows) {
+    public List<SpecGroup> findAllSpecGroupByCondition(Long cid) {
+        SpecGroup specGroup=new SpecGroup();
+        specGroup.setCid(cid);
+        return specGroupMapper.select(specGroup);
+    }
+
+
+    @Override
+    public PageResult<SpuBo> findAllSpuBoByCondition(String key, Boolean saleable, Integer page, Integer rows) {
 
         //1.添加条件查询；
-        Example  example=new Example(Spu.class);
+        Example example=new Example(Spu.class);
         Example.Criteria criteria = example.createCriteria();
 
         if (StringUtils.isNotBlank(key)){
@@ -102,4 +116,43 @@ public class SpuServiceImpl implements SpuService {
 
         return result;
     }
+
+    @Override
+    public List<SpecParam> findAllSpecParamByCondition(Long cid) {
+        SpecParam spb=new SpecParam();
+        spb.setCid(cid);
+        List<SpecParam> select = sp.select(spb);
+        return select;
+    }
+
+    @Transactional
+    @Override
+    public void save(SpuBo sb) {
+        //保存spu
+        sb.setId(null);
+        sb.setValid(true);
+        sb.setSaleable(true);
+        sb.setCreateTime(new Date());
+        sb.setLastUpdateTime(sb.getCreateTime());
+        sm.insertSelective(sb);
+        //保存spuDetail
+        sb.getSpuDetail().setSpuId(sb.getId());
+        sd.insertSelective(sb.getSpuDetail());
+        //保存sku
+        sb.getSkus().forEach(sku -> {
+            sku.setSpu_id(sb.getId());
+            sku.setCreateTime(sb.getCreateTime());
+            sku.setLastUpdateTime(sb.getLastUpdateTime());
+            sku.setEnable(true);
+            sk.insertSelective(sku);
+            //保存库存
+            Stock stock=new Stock();
+            stock.setSkuId(sku.getId());
+            stock.setStock(sku.getStock());
+            stockMapper.insertSelective(stock);
+        });
+        System.out.println("dd");
+    }
+
+
 }

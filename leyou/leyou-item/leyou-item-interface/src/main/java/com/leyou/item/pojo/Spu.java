@@ -11,7 +11,7 @@ public class Spu {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
     private String title;
     private String subTitle;
     private Long cid1;
@@ -23,11 +23,11 @@ public class Spu {
     private Date createTime;
     private Date lastUpdateTime;
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

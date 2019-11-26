@@ -17,6 +17,8 @@ public class SpecParam {
     private Boolean searching;
     private String segments;
 
+
+
     public Long getId() {
         return id;
     }

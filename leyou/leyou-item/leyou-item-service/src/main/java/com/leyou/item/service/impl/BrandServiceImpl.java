@@ -66,4 +66,9 @@ public class BrandServiceImpl implements BrandService {
     public void delete(Long bid) {
         bm.deleteByPrimaryKey(bid);
     }
+
+    @Override
+    public List<Brand> findAllByCid(Long cid) {
+        return  bm.findAllByCid(cid);
+    }
 }

@@ -36,6 +36,14 @@ public class BrandController {
         return  ResponseEntity.ok(result);
     }
 
+    @RequestMapping("cid/{cid}")
+    public ResponseEntity<List<Brand>> findAllByCid(@PathVariable("cid") Long cid){
+        List<Brand> list=bs.findAllByCid(cid);
+        if(CollectionUtils.isEmpty(list)){
+            return ResponseEntity.notFound().build();
+        }
+        return  ResponseEntity.ok(list);
+    }
 
     @PostMapping
     public ResponseEntity<Void> save(Brand brand,@RequestParam(name="cids",required = true) List<Long> cids){
