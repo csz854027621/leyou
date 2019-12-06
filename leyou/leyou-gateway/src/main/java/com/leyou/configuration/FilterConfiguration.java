@@ -21,6 +21,7 @@ public class FilterConfiguration {
         configuration.addAllowedHeader("*");
         configuration.addAllowedMethod("*");
         configuration.addAllowedOrigin("http://manage.leyou.com");
+        configuration.addAllowedOrigin("http://www.leyou.com");
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

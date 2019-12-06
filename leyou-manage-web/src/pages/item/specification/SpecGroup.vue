@@ -72,7 +72,7 @@ export default {
       loadData(){
           this.$http.get("/item/spec/groups/" + this.cid)
           .then(({data}) => {
-              this.groups = data;
+            this.groups = data;
           })
           .catch(() => {
               this.groups = [];

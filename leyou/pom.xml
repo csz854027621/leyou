@@ -13,6 +13,7 @@
         <module>leyou-item</module>
         <module>leyou-common</module>
         <module>leyou-upload</module>
+        <module>leyou-search</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -84,7 +85,7 @@
         </dependencies>
     </dependencyManagement>
 
-    <build>
+  <build>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

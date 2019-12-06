@@ -12,3 +12,4 @@ zuul:
   prefix: /api  #前缀
   routes:
     item-service: /item/**    #配置路由到商品 访问路径是localhost:1008/api/item/category/list
+    search-server: /search/**

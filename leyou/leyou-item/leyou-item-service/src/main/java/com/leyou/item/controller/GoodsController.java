@@ -24,8 +24,11 @@ public class GoodsController {
     private GoodsService gs;
 
 
+
+
+
     /**
-     * 根矩cid查询规格参数组
+     * 根据cid查询规格参数组
      * @param cid  商品类名id
      * @return
      */
@@ -64,9 +67,17 @@ public class GoodsController {
 
         return ResponseEntity.ok(result);
     }
+
+    /**
+     * 根据cid、search查询规格参数
+     * @param cid,search
+     * @return
+     */
     @GetMapping("spec/params")
-    public ResponseEntity<List<SpecParam>> findAllSpecParamByCondition(@RequestParam("cid") Long cid){
-        List<SpecParam> params = gs.findAllSpecParamByCondition(cid);
+    public ResponseEntity<List<SpecParam>> findAllSpecParamByCondition(
+            @RequestParam("cid") Long cid,
+            @RequestParam(value = "search",required = false) Boolean search){
+        List<SpecParam> params = gs.findAllSpecParamByCondition(cid,search);
 
         if (CollectionUtils.isEmpty(params)){
             return ResponseEntity.notFound().build();
@@ -74,6 +85,11 @@ public class GoodsController {
         return ResponseEntity.ok(params);
     }
 
+    /***
+     * 根据spuId查询SpuDetail
+     * @param spuId
+     * @return
+     */
     @GetMapping("spu/detail/{spuId}")
     public ResponseEntity<SpuDetail> findAllSpuDetailByCondition(@PathVariable("spuId") Long spuId){
         SpuDetail spuDetails=gs.findAllSpuDetailByCondition(spuId);
@@ -83,6 +99,11 @@ public class GoodsController {
         return ResponseEntity.ok(spuDetails);
     }
 
+    /**
+     * 根据SpuId查询sku集合
+     * @param id
+     * @return
+     */
     @GetMapping("sku/list")
     public ResponseEntity< List<Sku>> findAllSkusByCondition(@RequestParam(name="id") Long id){
         List<Sku> skus=gs.findAllSkusByCondition(id);
@@ -92,12 +113,22 @@ public class GoodsController {
         return ResponseEntity.ok(skus);
     }
 
+    /**
+     * 保存数据
+     * @param sb
+     * @return
+     */
     @PostMapping("goods")
     public ResponseEntity<Void> save(@RequestBody SpuBo sb){
         gs.save(sb);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+    /**
+     * 修改数据
+     * @param sb
+     * @return
+     */
     @PutMapping("goods")
     public ResponseEntity<Void> update(@RequestBody SpuBo sb){
         gs.update(sb);

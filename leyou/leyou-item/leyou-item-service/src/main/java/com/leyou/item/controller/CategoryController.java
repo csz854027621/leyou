@@ -24,6 +24,18 @@ public class CategoryController {
     CategoryService cs;
 
 
+    @GetMapping
+    public ResponseEntity<List<String>> findCategoryNameByCids(@RequestParam("cids") List<Long> cids){
+
+        List<String> ls = cs.findCategoryNameByCids(cids);
+        if (CollectionUtils.isEmpty(ls)){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        return ResponseEntity.ok(ls);
+    }
+
+
     @GetMapping("list")
     public ResponseEntity<List<Category>> findAllByPid(@RequestParam(name="pid",required = true) Long pid){
 

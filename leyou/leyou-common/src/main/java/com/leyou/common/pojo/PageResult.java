@@ -31,4 +31,13 @@ public class PageResult<T> {
     public void setItems(List<T> items) {
         this.items = items;
     }
+
+    @Override
+    public String toString() {
+        return "PageResult{" +
+                "total=" + total +
+                ", totalPage=" + totalPage +
+                ", items=" + items +
+                '}';
+    }
 }

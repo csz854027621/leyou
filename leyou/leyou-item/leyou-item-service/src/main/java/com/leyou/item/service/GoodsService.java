@@ -16,7 +16,7 @@ public interface GoodsService {
     PageResult<SpuBo> findAllSpuBoByCondition(String key, Boolean saleable,
                                             Integer page, Integer rows);
 
-    List<SpecParam> findAllSpecParamByCondition(Long cid);
+    List<SpecParam> findAllSpecParamByCondition(Long cid,Boolean search);
 
     void save(SpuBo sb);
 

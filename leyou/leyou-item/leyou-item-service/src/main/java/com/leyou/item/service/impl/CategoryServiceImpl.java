@@ -30,7 +30,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<String> findNameByCids(List<Long> cids) {
+    public List<String> findCategoryNameByCids(List<Long> cids) {
         List<Category> categories = cm.selectByIdList(cids);
         Stream<String> stringStream = categories.stream().map(category -> category.getName());
         return  stringStream.collect(Collectors.toList());
@@ -50,4 +50,6 @@ public class CategoryServiceImpl implements CategoryService {
     public void delete(Long id) {
         cm.deleteByPrimaryKey(id);
     }
+
+
 }

@@ -79,7 +79,7 @@ public class GoodsServiceImpl implements GoodsService {
             BeanUtils.copyProperties(spu, spuBo);
             Brand brand = bm.selectByPrimaryKey(spu.getBrandId());
             spuBo.setBname(brand.getName());
-            List<String> nameByCids = cs.findNameByCids(Arrays.asList(spuBo.getCid1(),
+            List<String> nameByCids = cs.findCategoryNameByCids(Arrays.asList(spuBo.getCid1(),
                     spuBo.getCid2(), spuBo.getCid3()));
             String cname = StringUtils.join(nameByCids, "-");
             spuBo.setCname(cname);
@@ -118,9 +118,10 @@ public class GoodsServiceImpl implements GoodsService {
     }
 
     @Override
-    public List<SpecParam> findAllSpecParamByCondition(Long cid) {
+    public List<SpecParam> findAllSpecParamByCondition(Long cid,Boolean search) {
         SpecParam spb = new SpecParam();
         spb.setCid(cid);
+        if (search!=null) spb.setSearching(search);
         List<SpecParam> select = sp.select(spb);
         return select;
     }

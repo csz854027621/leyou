@@ -45,11 +45,14 @@ public class SpuBo extends Spu {
         this.bname = bname;
     }
 
+
     @Override
     public String toString() {
-        return "SpuBo{" +
+        return super.toString()+"SpuBo{" +
                 "cname='" + cname + '\'' +
                 ", bname='" + bname + '\'' +
+                ", skus=" + skus +
+                ", spuDetail=" + spuDetail +
                 '}';
     }
 }

@@ -20,6 +20,15 @@ public class BrandController {
     @Autowired
     private BrandService bs;
 
+    @GetMapping("bid/{bid}")
+    public ResponseEntity<Brand> findBrandByBid(@PathVariable("bid") Long bid){
+        Brand one = bs.findOneByBid(bid);
+        if (one==null){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(one);
+    }
+
     @RequestMapping("page")
     public ResponseEntity<PageResult<Brand>> findAllByCondition(
         @RequestParam(name="key",required = false)   String key,
@@ -47,7 +56,6 @@ public class BrandController {
 
     @PostMapping
     public ResponseEntity<Void> save(Brand brand,@RequestParam(name="cids",required = true) List<Long> cids){
-
         bs.save(brand,cids);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
