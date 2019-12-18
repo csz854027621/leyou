@@ -63,7 +63,7 @@ public class SearchApplicationTest {
             List<SpuBo> items = result.getItems();
             List<Goods> goodsList = items.stream().map(spuBo -> {
                 try {
-                    return goodsService.buildGoodsBySpuBo(spuBo);
+                    return goodsService.buildGoodsBySpuBo(spuBo.getId());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

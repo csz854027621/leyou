@@ -9,6 +9,13 @@ spring:
       cluster-name: elasticsearch
   jackson:
     default-property-inclusion: non_null   #过滤object中null的数据转换成json
+  rabbitmq:
+    virtual-host: /leyou
+    username: leyou
+    password: leyou
+    port: 5672
+    host: 106.13.229.216
+
 eureka:
   client:
     service-url:
@@ -17,3 +24,5 @@ eureka:
   instance:
     lease-expiration-duration-in-seconds: 10
     lease-renewal-interval-in-seconds: 5
+logging:
+  config:

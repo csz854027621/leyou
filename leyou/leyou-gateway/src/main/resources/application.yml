@@ -13,3 +13,21 @@ zuul:
   routes:
     item-service: /item/**    #配置路由到商品 访问路径是localhost:1008/api/item/category/list
     search-server: /search/**
+    user-service: /user/**
+    auth-service: /auth/**
+  add-host-header: true   #过网关的时候携带原网站cookie
+  sensitive-headers:    #敏感信息不过滤，需设置为null。 原来为cookie.set-cookie
+
+leyou:
+  filter:
+    allowPaths:
+      - /api/auth
+      - /api/search
+      - /api/user/register
+      - /api/user/check
+      - /api/user/code
+      - /api/item
+  jwt:
+    pubKeyPath: D:\Desktop\login\rsa.pub # 公钥地址
+    expire: 30 # 过期时间,单位分钟
+    cookieName: LY_TOKEN

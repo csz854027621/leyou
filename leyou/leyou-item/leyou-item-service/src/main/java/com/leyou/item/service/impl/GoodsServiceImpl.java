@@ -9,6 +9,7 @@ import com.leyou.item.pojo.*;
 import com.leyou.item.service.CategoryService;
 import com.leyou.item.service.GoodsService;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -47,11 +48,31 @@ public class GoodsServiceImpl implements GoodsService {
     @Autowired
     private CategoryService cs;
 
+    @Autowired
+    private AmqpTemplate amqpTemplate;
+
+    @Override
+    public Spu findSpuBySpuId(Long spuId) {
+        Spu spu = sm.selectByPrimaryKey(spuId);
+        return spu;
+    }
+
     @Override
     public List<SpecGroup> findAllSpecGroupByCondition(Long cid) {
         SpecGroup specGroup = new SpecGroup();
         specGroup.setCid(cid);
         return specGroupMapper.select(specGroup);
+    }
+
+    @Override
+    public List<SpecGroup> findAllSpecsByCid(Long cid) {
+        List<SpecGroup> groups = this.findAllSpecGroupByCondition(cid);
+        SpecParam specParam=new SpecParam();
+        groups.forEach(spec->{
+            specParam.setGroupId(spec.getId());
+            spec.setParams(sp.select(specParam));
+        });
+        return groups;
     }
 
 
@@ -118,10 +139,11 @@ public class GoodsServiceImpl implements GoodsService {
     }
 
     @Override
-    public List<SpecParam> findAllSpecParamByCondition(Long cid,Boolean search) {
+    public List<SpecParam> findAllSpecParamByCondition(Long cid,Boolean search,Boolean generic) {
         SpecParam spb = new SpecParam();
         spb.setCid(cid);
         if (search!=null) spb.setSearching(search);
+        if(generic!=null) spb.setGeneric(generic);
         List<SpecParam> select = sp.select(spb);
         return select;
     }
@@ -202,6 +224,13 @@ public class GoodsServiceImpl implements GoodsService {
             stock.setStock(one.getStock());
             stockMapper.insertSelective(stock);
         });
+
+       /* this.amqpTemplate.convertAndSend(
+                "spring.test.exchange","a.b", "ceshiyixia");
+*/
+        //发送消息给队列
+        amqpTemplate.convertAndSend("item.insert",sb.getId());
+        System.out.println("发送消息成功！："+sb.getId());
 
     }
 

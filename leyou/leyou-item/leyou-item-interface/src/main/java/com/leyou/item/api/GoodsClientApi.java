@@ -3,9 +3,7 @@ package com.leyou.item.api;
 
 import com.leyou.common.pojo.PageResult;
 import com.leyou.item.bo.SpuBo;
-import com.leyou.item.pojo.Sku;
-import com.leyou.item.pojo.SpecParam;
-import com.leyou.item.pojo.SpuDetail;
+import com.leyou.item.pojo.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +15,31 @@ import java.util.List;
 
 public interface GoodsClientApi {
 
+
+    /**
+     * 通过cid 查询 groups 和 specs 规格参数组和规格参数
+     * @param 通过cid
+     * @return
+     */
+    @GetMapping("specs/groups/{cid}")
+    public List<SpecGroup> findAllSpecsByCid(@PathVariable("cid") Long cid);
+
+    /**
+     * 根据spuId查询spu
+     * @param spuId
+     * @return spu
+     */
+    @GetMapping("spu/{id}")
+    public Spu findSpuBySpuId(@PathVariable("id") Long spuId);
+
+    /**
+     * 分页查询spu的list
+     * @param key
+     * @param saleable
+     * @param page
+     * @param rows
+     * @return
+     */
     @RequestMapping("spu/page")
     public PageResult<SpuBo> findAllSpuBoByCondition(
             @RequestParam(name="key",required = false) String key,
@@ -57,6 +80,7 @@ public interface GoodsClientApi {
     @GetMapping("spec/params")
     public List<SpecParam> findAllSpecParamByCondition(
             @RequestParam("cid") Long cid,
-            @RequestParam(value = "search",required = false) Boolean search);
+            @RequestParam(value = "search",required = false) Boolean search,
+            @RequestParam(value = "generic",required = false) Boolean generic);
 
-    }
+}

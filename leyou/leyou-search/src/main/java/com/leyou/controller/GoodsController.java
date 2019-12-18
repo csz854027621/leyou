@@ -30,6 +30,8 @@ public class GoodsController {
             @RequestBody SearchRequest searchRequest
     ){
         SearchPageResult goodsByKey = goodsService.findGoodsByKey(searchRequest);
+        System.out.println(goodsByKey);
+
         if (CollectionUtils.isEmpty(goodsByKey.getItems())){
             return ResponseEntity.notFound().build();
         }

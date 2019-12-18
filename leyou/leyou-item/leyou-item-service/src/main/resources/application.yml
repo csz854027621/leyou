@@ -7,6 +7,15 @@ spring:
     password: root
     username: root
     url: jdbc:mysql://localhost:3306/hm49
+  rabbitmq:
+    host: 106.13.229.216
+    username: leyou
+    password: leyou
+    virtual-host: /leyou
+    port: 5672   # 默认配置
+    template:
+      exchange: csz_exchange
+
 eureka:
   client:
     service-url:

@@ -14,11 +14,11 @@ import java.util.List;
 @Service
 public interface GoodsService {
     /**
-     * 通过spuBo构建Goods
+     * 通过spuId构建Goods
      * @param spuBo
      * @return
      */
-    public Goods buildGoodsBySpuBo(SpuBo spuBo) throws IOException;
+    public Goods buildGoodsBySpuBo(Long spuId) throws IOException;
 
     /**
      * 通过关键词匹配查询

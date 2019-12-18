@@ -8,10 +8,7 @@ import com.leyou.client.CategoryClient;
 import com.leyou.client.GoodsClient;
 import com.leyou.common.pojo.PageResult;
 import com.leyou.item.bo.SpuBo;
-import com.leyou.item.pojo.Brand;
-import com.leyou.item.pojo.Sku;
-import com.leyou.item.pojo.SpecParam;
-import com.leyou.item.pojo.SpuDetail;
+import com.leyou.item.pojo.*;
 import com.leyou.pojo.Goods;
 import com.leyou.pojo.SearchPageResult;
 import com.leyou.pojo.SearchRequest;
@@ -19,10 +16,7 @@ import com.leyou.repository.GoodsRepository;
 import com.leyou.service.GoodsService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
-import org.elasticsearch.index.query.MatchQueryBuilder;
-import org.elasticsearch.index.query.Operator;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
@@ -62,23 +56,25 @@ public class GoodsServiceImpl implements GoodsService {
     private GoodsRepository goodsRepository;
 
     @Override
-    public Goods buildGoodsBySpuBo(SpuBo spuBo) throws IOException {
+    public Goods buildGoodsBySpuBo(Long spuId) throws IOException {
 
+
+        Spu spu = goodsClient.findSpuBySpuId(spuId);
         Goods goods = new Goods();
-        goods.setId(spuBo.getId());
-        goods.setCid1(spuBo.getCid1());
-        goods.setCid2(spuBo.getCid2());
-        goods.setCid3(spuBo.getCid3());
-        goods.setBrandId(spuBo.getBrandId());
-        goods.setCreateTime(spuBo.getCreateTime());
-        goods.setSubTitle(spuBo.getSubTitle());
+        goods.setId(spu.getId());
+        goods.setCid1(spu.getCid1());
+        goods.setCid2(spu.getCid2());
+        goods.setCid3(spu.getCid3());
+        goods.setBrandId(spu.getBrandId());
+        goods.setCreateTime(spu.getCreateTime());
+        goods.setSubTitle(spu.getSubTitle());
 
         List<String> categoryNames =
-                categoryClient.findCategoryNameByCids(Arrays.asList(spuBo.getCid1(), spuBo.getCid2(), spuBo.getCid3()));
-        Brand brand = brandClient.findBrandByBid(spuBo.getBrandId());
-        goods.setAll(spuBo.getTitle() + " " + StringUtils.join(categoryNames, " ") + " " + brand.getName()); //标题，类型名，品牌名
+                categoryClient.findCategoryNameByCids(Arrays.asList(spu.getCid1(), spu.getCid2(), spu.getCid3()));
+        Brand brand = brandClient.findBrandByBid(spu.getBrandId());
+        goods.setAll(spu.getTitle() + " " + StringUtils.join(categoryNames, " ") + " " + brand.getName()); //标题，类型名，品牌名
 
-        List<Sku> skus = goodsClient.findAllSkusBySpuId(spuBo.getId());
+        List<Sku> skus = goodsClient.findAllSkusBySpuId(spu.getId());
         List<Long> price = new ArrayList<>();  //价格 spu 的 list
         List<Map<String, Object>> skuViewNames = new ArrayList<>();   //skus
         skus.forEach(sku -> {
@@ -99,8 +95,8 @@ public class GoodsServiceImpl implements GoodsService {
 
 
         List<SpecParam> specParams =
-                goodsClient.findAllSpecParamByCondition(spuBo.getCid3(), true);
-        SpuDetail spuDetail = goodsClient.findAllSpuDetailBySpuId(spuBo.getId());
+                goodsClient.findAllSpecParamByCondition(spu.getCid3(), true,null);
+        SpuDetail spuDetail = goodsClient.findAllSpuDetailBySpuId(spu.getId());
         Map<String, Object> genericSpec = MAPPER.readValue(spuDetail.getGenericSpec(), new TypeReference<Map<String, Object>>() {
         });
         Map<String, List<Object>> specialSpec = MAPPER.readValue(spuDetail.getSpecialSpec(), new TypeReference<Map<String, List<Object>>>() {
@@ -129,8 +125,10 @@ public class GoodsServiceImpl implements GoodsService {
     public SearchPageResult findGoodsByKey(SearchRequest searchRequest) {
         NativeSearchQueryBuilder queryBuilder=new NativeSearchQueryBuilder();
         queryBuilder.withPageable(PageRequest.of(searchRequest.getPage()-1,searchRequest.getSize()));
-        QueryBuilder basicQuery = QueryBuilders.matchQuery("all", searchRequest.getKey()).operator(Operator.AND);
-        queryBuilder.withQuery(basicQuery); //and匹配
+       // QueryBuilder basicQuery = QueryBuilders.matchQuery("all", searchRequest.getKey()).operator(Operator.AND);
+        BoolQueryBuilder basicQuery=getBoolQueryBuilder(searchRequest);
+        queryBuilder.withQuery(basicQuery); //基础查询
+
 
         queryBuilder.withSourceFilter(new FetchSourceFilter(new String[]{"id","subTitle","skus"},null));
         queryBuilder.addAggregation(AggregationBuilders.terms("brands").field("brandId"));
@@ -155,12 +153,32 @@ public class GoodsServiceImpl implements GoodsService {
         return result;
     }
 
+    private BoolQueryBuilder getBoolQueryBuilder(SearchRequest searchRequest) {
+
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        boolQueryBuilder.must(QueryBuilders.matchQuery("all",searchRequest.getKey()).operator(Operator.AND));
+        Map<String, Object> filter = searchRequest.getFilter();
+        if(filter!=null) {
+            Set<Map.Entry<String, Object>> entries = filter.entrySet();
+            entries.forEach(entry -> {
+                if(StringUtils.equals(entry.getKey(),"品牌")){
+                    boolQueryBuilder.filter(QueryBuilders.termQuery("brandId", entry.getValue()));
+                }else if (StringUtils.equals(entry.getKey(),"分类")){
+                    boolQueryBuilder.filter(QueryBuilders.termQuery("cid3", entry.getValue()));
+                }else {
+                    boolQueryBuilder.filter(QueryBuilders.termQuery("spec." + entry.getKey() + ".keyboard", entry.getValue()));
+                }
+            });
+        }
+        return boolQueryBuilder;
+    }
+
     private List<Map<String, Object>> getSpecMap(Long id, QueryBuilder basicQuery) {
 
         List<Map<String, Object>>  specMapList=new ArrayList<>();
         NativeSearchQueryBuilder queryBuilder=new NativeSearchQueryBuilder();
         queryBuilder.withQuery(basicQuery);
-        List<SpecParam> specParams = goodsClient.findAllSpecParamByCondition(id, true);
+        List<SpecParam> specParams = goodsClient.findAllSpecParamByCondition(id, true,null);
         specParams.forEach(specParam -> {
             queryBuilder.addAggregation(
                     AggregationBuilders.terms(specParam.getName()
@@ -184,19 +202,6 @@ public class GoodsServiceImpl implements GoodsService {
             map.put("options",list);
             specMapList.add(map);
         }
-
-
-        /*specParams.forEach(specParam -> {
-            StringTerms aggregation = (StringTerms)search.getAggregation(specParam.getName());
-            List<StringTerms.Bucket> buckets = aggregation.getBuckets();
-            buckets.forEach(bucket -> {
-                String keyAsString = bucket.getKeyAsString();
-                Map<String,Object> map=new HashMap<>();
-                map.put("id",specParam.getName());
-                map.put("name",keyAsString);
-                specMapList.add(map);
-            });
-        });*/
 
         return specMapList;
     }

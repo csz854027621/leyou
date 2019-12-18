@@ -7,6 +7,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
+
 @Configuration
 public class FilterConfiguration {
 
@@ -20,11 +21,11 @@ public class FilterConfiguration {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.addAllowedHeader("*");
         configuration.addAllowedMethod("*");
-        configuration.addAllowedOrigin("http://manage.leyou.com");
+        configuration.addAllowedOrigin("http://manage.leyou.com");  //可被跨域的域名
         configuration.addAllowedOrigin("http://www.leyou.com");
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
+        source.registerCorsConfiguration("/**", configuration); //被允许的所有资源
         CorsFilter corsFilter = new CorsFilter(source);
 
         return corsFilter;

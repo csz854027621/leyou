@@ -2,10 +2,7 @@ package com.leyou.item.controller;
 
 import com.leyou.common.pojo.PageResult;
 import com.leyou.item.bo.SpuBo;
-import com.leyou.item.pojo.Sku;
-import com.leyou.item.pojo.SpecGroup;
-import com.leyou.item.pojo.SpecParam;
-import com.leyou.item.pojo.SpuDetail;
+import com.leyou.item.pojo.*;
 import com.leyou.item.service.GoodsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,7 +12,9 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 public class GoodsController {
@@ -23,8 +22,35 @@ public class GoodsController {
     @Autowired
     private GoodsService gs;
 
+    /**
+     * 通过cid 查询 groups 和 specs 规格参数组和规格参数
+     * @param 通过cid
+     * @return
+     */
+    @GetMapping("specs/groups/{cid}")
+    public ResponseEntity<List<SpecGroup>> findAllSpecsByCid(@PathVariable("cid") Long cid){
+        List<SpecGroup> allSpecsByCid = gs.findAllSpecsByCid(cid);
+        if (CollectionUtils.isEmpty(allSpecsByCid)||allSpecsByCid.size()==0){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(allSpecsByCid);
+    }
 
+    /**
+     * 通过spuId 查询 spu
+     * @param spuId
+     * @return
+     */
+    @GetMapping("spu/{id}")
+    public ResponseEntity<Spu> findSpuBySpuId(@PathVariable("id") Long spuId){
 
+        
+        Spu spuBySpuId = gs.findSpuBySpuId(spuId);
+        if (spuBySpuId==null){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(spuBySpuId);
+    }
 
 
     /**
@@ -76,8 +102,10 @@ public class GoodsController {
     @GetMapping("spec/params")
     public ResponseEntity<List<SpecParam>> findAllSpecParamByCondition(
             @RequestParam("cid") Long cid,
-            @RequestParam(value = "search",required = false) Boolean search){
-        List<SpecParam> params = gs.findAllSpecParamByCondition(cid,search);
+            @RequestParam(value = "search",required = false) Boolean search,
+            @RequestParam(value = "generic",required = false) Boolean generic
+            ){
+        List<SpecParam> params = gs.findAllSpecParamByCondition(cid,search,generic);
 
         if (CollectionUtils.isEmpty(params)){
             return ResponseEntity.notFound().build();
